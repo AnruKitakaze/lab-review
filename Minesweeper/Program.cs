@@ -1,39 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
-namespace saper
+namespace Minesweeper
 {
     internal class Program
 
     {
 
         //Вывод открытого поля
-        static void game_open(int[,] pole)
+        static void OpenGame(int[,] field)
         {
             Console.Write("   ");
-            for (int i = 0; i < pole.GetLength(0); i++)
+            for (int i = 0; i < field.GetLength(0); i++)
             {
                 Console.Write($"{i + 1,2} ");
             }
             Console.WriteLine();
 
-            for (int i = 0; i < pole.GetLength(0); i++)
+            for (int i = 0; i < field.GetLength(0); i++)
             {
                 Console.Write($"{i + 1,2}|");
-                for (int j = 0; j < pole.GetLength(1); j++)
+                for (int j = 0; j < field.GetLength(1); j++)
                 {
-                    if (pole[i, j] == 0)
+                    if (field[i, j] == 0)
                     {
                         Console.Write($"{"( )",2}");
                     }
-                    if (pole[i, j] > 0)
+                    if (field[i, j] > 0)
                     {
-                        Console.Write($"{pole[i, j],2} ");
+                        Console.Write($"{field[i, j],2} ");
                     }
-                    if (pole[i, j] < 0)
+                    if (field[i, j] < 0)
                     {
                         Console.Write($"{" M ",2}");
                     }
@@ -42,14 +38,12 @@ namespace saper
             }
         }
 
-
-        //Считаем сколько клеток открыто
-        static int cnt_move(int[,] pole, int[,] pole_move)
+        static int CountOpenedCells(int[,] field, int[,] pole_move)
         {
             int cnt_move = 0;
-            for (int i = 0; i < pole.GetLength(0); i++)
+            for (int i = 0; i < field.GetLength(0); i++)
             {
-                for (int j = 0; j < pole.GetLength(1); j++)
+                for (int j = 0; j < field.GetLength(1); j++)
                 {
                     if (pole_move[i, j] == 1) cnt_move++;
                 }
@@ -57,17 +51,13 @@ namespace saper
             return cnt_move;
         }
 
-
-
         //Запрашиваем координаты
-        static string move()
+        static string GetUserInput()
         {
             Console.Write("Сделайте ход: ");
             String s = Console.ReadLine();
             return s;
         }
-
-
 
         //Даём значение жизни - возвращаем 1 или 0
         static int check_life(int[,] pole, int x, int y)
@@ -82,15 +72,12 @@ namespace saper
             return life;
         }
 
-
         //Ставим или убираем флаги
         static void nominate_flag(int[,] pole_flag, int x, int y)
         {
             if (pole_flag[x, y] != 1) pole_flag[x, y] = 1;
             else pole_flag[x, y] = 0;
         }
-
-
 
         //Открываем все пустые рядомстоящие точки
         static void check_pustoi_move(int[,] pole, int[,] pole_move, int x, int y)
@@ -149,141 +136,140 @@ namespace saper
             }
         }
 
-
-
         //Выводим поле со значением ходов
-        static void check_pole_and_print(int[,] pole_flag, int[,] pole, int[,] pole_move, int razmer, int cnt_min)
+        static void Play(int[,] flagsSet, int[,] field, int[,] moves, int fieldSize, int minesAmount)
         {
+            int x;
+            int y;
+            string type_of_move;
 
-            //Узнаём координаты и тип хода
-            String s = move();
-            var ar = s.Split(' ');
-            int x = int.Parse(ar[0]);
-            int y = int.Parse(ar[1]);
-            string type_of_move = ar[2];
+            // TODO: Вынести в отдельный метод
+            // GetUserAction / GetUserInput
+            while (true)
+            {
+                try
+                {
+                    Console.Write("Сделайте ход (x y action): ");
+                    string? s = Console.ReadLine();
+                    if (s == null)
+                    {
+                        // TODO: Обработать q для выхода из программы
+                        Console.WriteLine("Вы ничего не ввели. Если хотите выйти, введите 'q'");
+                        continue;
+                    }
+                    var ar = s.Split(' ');
+                    x = int.Parse(ar[0]);
+                    y = int.Parse(ar[1]);
+                    type_of_move = ar[2];
 
-            int life = 1; //Заранее жизнь есть
+                    break;
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Введи ход в формате 'x y action', где action может быть к или ф:");
+                    continue;
+                }
+            }
 
-            Console.Clear(); //Очищаем консоль
+            int life = 1;
+            Console.Clear();
 
-            //Напоминаем предыдущий ход, по которому идёт действие
+            // TOOD: Вынести в отдельный метод
             if (type_of_move == "к")
             {
                 Console.WriteLine($"Твой ход был: копать {x}, {y} ");
-                check_pustoi_move(pole, pole_move, x - 1, y - 1); //Добавляем инфу о ходе и пустых клетках(если они есть)
-                life = check_life(pole, x, y); //Узнаём реальное значение жизни
+                check_pustoi_move(field, moves, x - 1, y - 1); //Добавляем инфу о ходе и пустых клетках(если они есть)
+                life = check_life(field, x, y); //Узнаём реальное значение жизни
             }
             if (type_of_move == "ф")
             {
                 Console.WriteLine($"Твой ход был: флаг {x}, {y} ");
-                nominate_flag(pole_flag, x - 1, y - 1); //Ставим флаг на нужное место
+                nominate_flag(flagsSet, x - 1, y - 1); //Ставим флаг на нужное место
             }
 
-
-
             Console.WriteLine();
-
-            //Делаем из координат индексы
             x--;
             y--;
 
-
             //Нумеруем клетку сверху
             Console.Write("   ");
-            for (int k = 0; k < pole.GetLength(0); k++)
+            for (int k = 0; k < field.GetLength(0); k++)
             {
                 Console.Write($"{k + 1,2} ");
             }
             Console.WriteLine();
 
-            for (int i = 0; i < pole.GetLength(0); i++)
+            for (int i = 0; i < field.GetLength(0); i++)
             {
                 Console.Write($"{i + 1,2}|"); //Нумеруем клетку слева
-                for (int j = 0; j < pole.GetLength(1); j++)
+                for (int j = 0; j < field.GetLength(1); j++)
                 {
 
-                    if (pole_flag[i, j] == 1) Console.Write($"{" Ф ",2}"); //Ставим флаги где нужно
-
-                    //Печатаем поле
-                    if (pole_flag[i, j] != 1)
+                    if (flagsSet[i, j] == 1)
                     {
-                        if (pole_move[i, j] == 0) //Если нет инфы о клетке
-                        {
-                            Console.Write("   ");
-                        }
-                        else
-                        if (pole[i, j] == 0 && pole_move[i, j] == 1) //Если известна пустая клетка
-                        {
-                            Console.Write($"{"( )",2}");
-                        }
-                        else
-                        if (pole[i, j] > 0 && pole_move[i, j] == 1) //Если известна цифра
-                        {
-                            Console.Write($"{pole[i, j],2} ");
-                        }
-                        else
-                        if (pole[i, j] < 0 && pole_move[i, j] == 1) //Если известна бомба
-                        {
-                            Console.Write($"{" M ",2}");
-                        }
+                        Console.Write($"{" Ф ",2}"); //Ставим флаги где нужно
+                        continue;
+                    }
+
+                    if (moves[i, j] == 0) //Если нет инфы о клетке
+                    {
+                        Console.Write("   ");
+                    }
+                    else if (field[i, j] == 0 && moves[i, j] == 1) //Если известна пустая клетка
+                    {
+                        Console.Write($"{"( )",2}");
+                    }
+                    else if (field[i, j] > 0 && moves[i, j] == 1) //Если известна цифра
+                    {
+                        Console.Write($"{field[i, j],2} ");
+                    }
+                    else if (field[i, j] < 0 && moves[i, j] == 1) //Если известна бомба
+                    {
+                        Console.Write($"{" M ",2}");
                     }
 
                 }
                 Console.WriteLine();
             }
 
-            //Если попали на бомбу
-            if (life == 0)
+            Console.Clear();
+
+            if (life == 1 && CountOpenedCells(field, moves) != (fieldSize * fieldSize) - minesAmount)
             {
-                Console.Clear();
+                Play(flagsSet, field, moves, fieldSize, minesAmount); //Рекурсия. Вызываем эту же функцию
+            }
+            else if (life == 0)
+            {
                 Console.WriteLine($"Твой ход был: копать {x + 1}, {y + 1}");
                 Console.WriteLine("Проиграл!");
-                game_open(pole);
-                Console.Write("Начать заново? : ");
-                string yas_no = Console.ReadLine();
-                if (yas_no == "да")
-                {
-                    Console.Clear();
-                    game_again();
-                }
             }
-
-            //Если выиграли
-            if (cnt_move(pole, pole_move) == (razmer * razmer) - cnt_min)
+            else
             {
-                Console.Clear();
                 Console.WriteLine($"Твой ход был: копать {x}, {y}");
                 Console.WriteLine("Ты выиграл!!!");
-                game_open(pole);
-                Console.Write("Начать заново? : ");
-                string yas_no = Console.ReadLine();
-                if (yas_no == "да")
-                {
-                    Console.Clear();
-                    game_again();
-                }
             }
 
-            //Если не попали на бомбу, то продолжаем игру
-            else if (life == 1)
+            OpenGame(field);
+            Console.Write("Начать заново? : ");
+            string yas_no = Console.ReadLine();
+            if (yas_no == "да")
             {
-                check_pole_and_print(pole_flag, pole, pole_move, razmer, cnt_min); //Рекурсия. Вызываем эту же функцию
+                Console.Clear();
+                Start();
             }
         }
 
-
-        //Выводим пустое поле. Нужно для начала
-        static void print_pustoe_pole(int[,] pole)
+        static void PrintEmptyField(int x_size, int y_size)
         {
             Console.Write("   ");
-            for (int i = 0; i < pole.GetLength(0); i++)
+            for (int i = 0; i < x_size; i++)
             {
                 Console.Write($"{i + 1,2} ");
             }
             Console.WriteLine();
 
 
-            for (int i = 0; i < pole.GetLength(1); i++)
+            for (int i = 0; i < y_size; i++)
             {
                 Console.Write($"{i + 1,2}|");
                 Console.WriteLine();
@@ -291,54 +277,56 @@ namespace saper
             Console.WriteLine();
         }
 
-
-        //Создаём полноценное поле. Раскидываем бомбы и нумеруем округу
-        static void rand_pole(int[,] pole, int min_need)
+        static void PopulateFieldWithMines(int[,] field, int mines_needed)
         {
-            Random rng = new Random();
-            int min_ready = 0;
+            Random random = new();
+            int mines_ready = 0;
+            const int Mine = -1000;
+
             do
             {
-                int x = rng.Next(pole.GetLength(0));
-                int y = rng.Next(pole.GetLength(1));
-                if (pole[x, y] >= 0)
+                int x = random.Next(field.GetLength(0));
+                int y = random.Next(field.GetLength(1));
+
+                if (field[x, y] >= 0)
                 {
-                    pole[x, y] = -1000;
+                    field[x, y] = Mine;
 
-                    if (x > 0 && y > 0) pole[x - 1, y - 1]++;
-                    if (y > 0) pole[x, y - 1]++;
-                    if (x > 0) pole[x - 1, y]++;
-                    if (x > 0 && y < pole.GetLength(1) - 1) pole[x - 1, y + 1]++;
-                    if (x < pole.GetLength(0) - 1 && y > 0) pole[x + 1, y - 1]++;
-                    if (x < pole.GetLength(0) - 1 && y < pole.GetLength(1) - 1)
+                    if (x > 0 && y > 0) field[x - 1, y - 1]++;
+                    if (y > 0) field[x, y - 1]++;
+                    if (x > 0) field[x - 1, y]++;
+                    if (x > 0 && y < field.GetLength(1) - 1) field[x - 1, y + 1]++;
+                    if (x < field.GetLength(0) - 1 && y > 0) field[x + 1, y - 1]++;
+                    if (x < field.GetLength(0) - 1 && y < field.GetLength(1) - 1)
                     {
-                        pole[x + 1, y + 1]++;
+                        field[x + 1, y + 1]++;
                     }
-                    if (x < pole.GetLength(0) - 1) pole[x + 1, y]++;
-                    if (y < pole.GetLength(1) - 1) pole[x, y + 1]++;
+                    if (x < field.GetLength(0) - 1) field[x + 1, y]++;
+                    if (y < field.GetLength(1) - 1) field[x, y + 1]++;
 
-                    min_ready++;
+                    mines_ready++;
                 }
-            } while (min_ready < min_need);
+            } while (mines_ready < mines_needed);
         }
 
-
-        static void game_again()
+        static void Start()
         {
-            const int razmer = 5; //Задаём размер поля
-            int[,] pole = new int[razmer, razmer]; //Храним внутреигровую инфу
-            int[,] pole_move = new int[razmer, razmer]; //Храним инфу о ходах
-            int[,] pole_flag = new int[razmer, razmer]; //Храним инфу о флагах
-            int cnt_min = 5; //Сколько нужно мин
-            print_pustoe_pole(pole); //Для начала создаём пустое поле(клетку)
-            rand_pole(pole, cnt_min); //Создаём полноценное поле
-            check_pole_and_print(pole_flag, pole, pole_move, razmer, cnt_min); //Оснавная рекурсивня функция игры
-        }
+            const int fieldSize = 5;
+            const int minesAmount = 5;
 
+            int[,] field = new int[fieldSize, fieldSize];
+            int[,] moves = new int[fieldSize, fieldSize];
+            int[,] flagsSet = new int[fieldSize, fieldSize];
+
+            PrintEmptyField(field.GetLength(0), field.GetLength(1));
+            PopulateFieldWithMines(field, minesAmount);
+
+            Play(flagsSet, field, moves, fieldSize, minesAmount);
+        }
 
         static void Main(string[] args)
         {
-            game_again();
+            Start();
         }
     }
 }

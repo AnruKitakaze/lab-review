@@ -1,0 +1,15 @@
+/home/anru/repos/lab-review/Minesweeper/bin/Debug/net9.0/Minesweeper
+/home/anru/repos/lab-review/Minesweeper/bin/Debug/net9.0/Minesweeper.deps.json
+/home/anru/repos/lab-review/Minesweeper/bin/Debug/net9.0/Minesweeper.runtimeconfig.json
+/home/anru/repos/lab-review/Minesweeper/bin/Debug/net9.0/Minesweeper.dll
+/home/anru/repos/lab-review/Minesweeper/bin/Debug/net9.0/Minesweeper.pdb
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.GeneratedMSBuildEditorConfig.editorconfig
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.AssemblyInfoInputs.cache
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.AssemblyInfo.cs
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.csproj.CoreCompileInputs.cache
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.sourcelink.json
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.dll
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/refint/Minesweeper.dll
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.pdb
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/Minesweeper.genruntimeconfig.cache
+/home/anru/repos/lab-review/Minesweeper/obj/Debug/net9.0/ref/Minesweeper.dll
