@@ -1,23 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MatrixDeterminant
+﻿namespace MatrixDeterminant
 {
     internal class Program
     {
-
-        //Считаем определитель матрицы 2х2
-        static double matrix_det_2x2(double[,] matrix)
-        {
-            double det = ((matrix[0, 0] * matrix[1, 1]) - (matrix[0, 1] * matrix[1, 0]));
-            return det;
-        }
-
-
 
         //Генерируем разложенную матрицу
         static double[,] matrix_gen(double[,] mat, int n, int k)
@@ -42,47 +26,34 @@ namespace MatrixDeterminant
         }
 
 
-        //Раскладывает и считает определитель
-        static double det_gen(double[,] matrix, int n)
+        static double CalculateDeterminant(double[,] matrix, int n)
         {
             double det = 0;
             for (int i = 0; i < n; i++)
             {
-                //Повторно раскладываем матрицу
                 if (n != 2)
                 {
                     double[,] mat_1 = matrix_gen(matrix, n, i);
                     int n_1 = mat_1.GetLength(0);
-                    det += Math.Pow(-1, i) * matrix[0, i] * det_gen(mat_1, n_1);
+                    det += Math.Pow(-1, i) * matrix[0, i] * CalculateDeterminant(mat_1, n_1);
 
                 }
 
-                //Когда дошли до размера 2х2, то считаем мини определитель
                 else if (n == 2)
                 {
-                    det = matrix_det_2x2(matrix);
+                    det = (matrix[0, 0] * matrix[1, 1]) - (matrix[0, 1] * matrix[1, 0]);
                     break;
                 }
             }
-            //matrix_print(matrix, n, Space(matrix, n), det);
 
-            return det; //Выводим итоговый определитель
+            return det;
         }
 
 
-
-        //Делает строку пробелов
-        static string space_gen(int n)
+        static string GetEmptyString(int length)
         {
-            string s = "";
-            for (int i = 0; i < n; i++)
-            {
-                s += " ";
-            }
-            return s;
+            return new string(' ', length);
         }
-
-
 
         //Сколько нужно места для самого большого элемента
         static int Space(double[,] mat, int n)
@@ -125,14 +96,14 @@ namespace MatrixDeterminant
                     if ((mat_el % 2) != (space % 2))
                     {
                         // то сдвигаемся чуть вправо
-                        string space_need_left = space_gen((space - mat_el + 1) / 2);
-                        string space_need_right = space_gen((space - mat_el - 1) / 2);
+                        string space_need_left = GetEmptyString((space - mat_el + 1) / 2);
+                        string space_need_right = GetEmptyString((space - mat_el - 1) / 2);
                         Console.Write($"{space_need_left}{matrix[i, j]}{space_need_right}");
                     }
                     //Ставим элемент посередине
                     else if ((mat_el % 2) == (space % 2))
                     {
-                        string space_need = space_gen((space - mat_el) / 2);
+                        string space_need = GetEmptyString((space - mat_el) / 2);
                         Console.Write($"{space_need}{matrix[i, j]}{space_need}");
                     }
                 }
@@ -156,49 +127,78 @@ namespace MatrixDeterminant
 
 
 
-        //Запрашивем и дозаполняем начальную матрицу
-        static void matrix_finish(double[,] matrix, int n)
+        static protected void FillMatrixFromConsole(double[,] matrix)
         {
-            for (int i = 1; i < n; i++)
+            int size = matrix.GetLength(0);
+
+            for (int row = 0; row < size; row++)
             {
-                string a = Console.ReadLine();
-                var b = a.Split(' ');
-                for (int j = 0; j < n; j++)
+                string[] userInput;
+                while (true)
                 {
-                    matrix[i, j] = int.Parse(b[j]);
+                    Console.WriteLine($"Введите строку {row + 1} из {size}");
+                    userInput = (Console.ReadLine() ?? "0").Split(' ');
+
+                    if (userInput.Length != size)
+                    {
+                        Console.WriteLine($"Вы ввели {userInput.Length} значений, требуется {size}.");
+                        continue;
+                    }
+
+                    for (int column = 0; column < size; column++)
+                    {
+                        int result;
+                        while (!int.TryParse(userInput[column], out result))
+                        {
+                            Console.WriteLine(
+                                $"Значение {userInput[column]} в колонке {column + 1} не является целым числом.\n" +
+                                "Повторите ввод этого числа:"
+                            );
+                            userInput[column] = Console.ReadLine() ?? "";
+                        }
+                        matrix[row, column] = result;
+                    }
+
+                    break;
                 }
+
             }
         }
 
-
-
-        static void Main(string[] args)
+        static double[,] GetMatrixFromConsole()
         {
-            string str_0 = Console.ReadLine(); //Берём первую строку
-            var str_1 = str_0.Split(' ');
-            int n = str_1.Length;
-            double[,] matrix = new double[n, n]; //Создаём матрицу размерности первой строки
-
-            //Заносим в матрицу первую строку
-            for (int i = 0; i < n; i++)
+            int size = 0;
+            while (size < 1)
             {
-                matrix[0, i] = int.Parse(str_1[i]);
+                Console.WriteLine("Задайте размерность матрицы: ");
+                // NOTE: А тут подстелили себе всю солому в сарае
+                size = int.TryParse(Console.ReadLine(), out int result) ? result : -1;
+                // условие ? если тру : если фолс; 
+
+                if (size < 1)
+                {
+                    Console.WriteLine("Размер матрицы должен быть целым числом больше 0");
+                }
             }
-            matrix_finish(matrix, n); //Запрашиваем и заносим всё оставшиеся
+
+            double[,] matrix = new double[size, size];
+
+            FillMatrixFromConsole(matrix);
+
+            return matrix;
+        }
 
 
+        static void Main()
+        {
+            double[,] matrix = GetMatrixFromConsole();
+            int n = matrix.GetLength(0);
 
-            double det = det_gen(matrix, n); //Основная функция которая находит определитель
+            double det = CalculateDeterminant(matrix, n); //Основная функция которая находит определитель
 
-
-            //Делаем отступ
             Console.WriteLine();
 
-
-            //выводим матрицу с форматированием
             matrix_print(matrix, n, Space(matrix, n), det);
-
-
 
             Console.ReadKey();
         }
