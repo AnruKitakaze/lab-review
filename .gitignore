@@ -1,0 +1,11 @@
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+
+# Build results
+Debug/
+Release/
+x64/
+bin/
+obj/
